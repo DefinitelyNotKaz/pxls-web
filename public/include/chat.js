@@ -1604,12 +1604,17 @@ const chat = (function() {
         if (skipLinkCheck) {
           window.open(href, '_blank');
         } else {
-          self._popLinkCheck(href).then(action => {
-            modal.closeAll();
-            if (action) {
-              window.open(href, '_blank');
-            }
-          });
+          const url = new URL(href);
+          if (url.hostname !== window.location.hostname) {
+            self._popLinkCheck(href).then(action => {
+              modal.closeAll();
+              if (action) {
+                window.open(href, '_blank');
+              }
+            });
+          } else {
+            window.open(href, '_blank')
+          }
         }
       }
 
