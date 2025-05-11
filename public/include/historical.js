@@ -10,7 +10,9 @@ function runLookup(board, clientX, clientY) {
 
     const history = data.placements.reverse();
     const placements = history.length;
-    const lastUpdate = formatTimestamp((history[0] && history[0].time) || "");
+    const lastUpdate = formatRelativeTimestamp(
+      (history[0] && history[0].time) || "",
+    );
 
     historyBody.append(createStatsArticle(placements, lastUpdate));
 
@@ -44,9 +46,7 @@ function createStatsArticle(placements, lastUpdate) {
   pad.classList.add("pad-wrapper");
 
   pad.appendChild(createHistoryField("Placements: ", placements));
-  pad.appendChild(
-    createHistoryField("Last Updated: ", formatRelativeTimestamp(lastUpdate)),
-  );
+  pad.appendChild(createHistoryField("Last Updated: ", lastUpdate));
 
   article.appendChild(pad);
   return article;
