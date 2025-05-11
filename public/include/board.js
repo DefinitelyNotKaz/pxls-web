@@ -357,6 +357,7 @@ const board = (function() {
           clearTimeout(self.holdTimer.id);
         }
         if (event.shiftKey === true) return;
+        if (event.ctrlKey === true) return;
         self.holdTimer.id = -1;
         let touch = false;
         let clientX = event.clientX;
