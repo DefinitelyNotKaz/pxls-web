@@ -5,14 +5,12 @@ module.exports.historical = runLookup;
 function runLookup(board, clientX, clientY) {
   const pos = board.fromScreen(clientX, clientY);
   $.get("/historical", pos, function (data) {
-    console.log(data, place);
-
     const historyBody = $("#history>.panel-body");
     historyBody.empty();
 
     const history = data.placements.reverse();
     const placements = history.length;
-    const lastUpdate = formatTimestamp(history[0]?.time || "");
+    const lastUpdate = formatTimestamp((history[0] && history[0].time) || "");
 
     historyBody.append(createStatsArticle(placements, lastUpdate));
 
@@ -76,11 +74,11 @@ function createColorField(label, color) {
   strong.innerText = label;
 
   const span = document.createElement("span");
-  span.innerText = `${color.name} (${color.code})`;
+  span.innerText = `${place.palette[color].name} (#${color})`;
 
   const swatch = document.createElement("div");
   swatch.classList.add("color-swatch");
-  swatch.style.backgroundColor = color.code;
+  swatch.style.backgroundColor = `#${place.palette[color].value}`;
 
   field.appendChild(strong);
   field.appendChild(span);
