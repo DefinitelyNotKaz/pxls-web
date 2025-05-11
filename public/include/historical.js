@@ -1,37 +1,98 @@
+import { place } from "./place";
+
 module.exports.historical = runLookup;
 
 function runLookup(board, clientX, clientY) {
   const pos = board.fromScreen(clientX, clientY);
   $.get("/historical", pos, function (data) {
     console.log(data);
+
+    const historyBody = $("#history>.body");
+    historyBody.empty();
+
+    const history = data.placements.reverse();
+    const placements = history.length;
+    const lastUpdate = formatTimestamp(history[0]?.time || "");
+
+    historyBody.append(createStatsArticle(placements, lastUpdate));
+
+    history.forEach((p) => {
+      historyBody.append(createPlacementArticle(p));
+    });
+
+    $("#history").classList.add("open");
+
+    console.log(place.palette);
   });
 }
 
-// $.get("/lookup", pos, function (data) {
-//   data = data || { x: pos.x, y: pos.y, bg: true };
-//   if (data && data.username && chat.typeahead.helper) {
-//     chat.typeahead.helper
-//       .getDatabase("users")
-//       .addEntry(data.username, data.username);
-//   }
-//   if (self.handle) {
-//     self.handle(data);
-//   } else {
-//     self.create(data);
-//   }
-// }).fail(function () {
-//   self
-//     ._makeShell({ x: pos.x, y: pos.y })
-//     .find(".content")
-//     .first()
-//     .append(
-//       $("<p>")
-//         .css("color", "#c00")
-//         .text(
-//           __(
-//             "An error occurred, either you aren't logged in or you may be attempting to look up users too fast. Please try again in 60 seconds",
-//           ),
-//         ),
-//     );
-//   self.elements.lookup.fadeIn(200);
-// });
+function createHistoryField(label, value) {
+  const field = document.createElement("div");
+  field.classList.add("history-field");
+
+  const strong = document.createElement("strong");
+  strong.innerText = label;
+
+  const span = document.createElement("span");
+  span.innerText = value;
+
+  field.appendChild(strong);
+  field.appendChild(span);
+
+  return field;
+}
+
+function createStatsArticle(placements, lastUpdate) {
+  const article = document.createElement("article");
+  const pad = document.createElement("div");
+  pad.classList.add("pad-wrapper");
+
+  pad.appendChild(createHistoryField("Placements: ", placements));
+  pad.appendChild(createHistoryField("Last Updated: ", lastUpdate));
+
+  article.appendChild(pad);
+  return article;
+}
+
+function createPlacementArticle(placement) {
+  const article = document.createElement("article");
+  const pad = document.createElement("div");
+  pad.classList.add("pad-wrapper");
+
+  pad.appendChild(createHistoryField("Username: ", placement.username));
+  pad.appendChild(createHistoryField("Faction: ", placement.faction));
+  pad.appendChild(
+    createHistoryField("Time: ", formatTimestamp(placement.time)),
+  );
+  pad.appendChild(createColorField("Color: ", placement.color));
+
+  article.appendChild(pad);
+  return article;
+}
+
+function createColorField(label, color) {
+  const field = document.createElement("div");
+  field.classList.add("history-field", "color-field");
+
+  const strong = document.createElement("strong");
+  strong.innerText = label;
+
+  const span = document.createElement("span");
+  span.innerText = `${color.name} (${color.code})`;
+
+  const swatch = document.createElement("div");
+  swatch.classList.add("color-swatch");
+  swatch.style.backgroundColor = color.code;
+
+  field.appendChild(strong);
+  field.appendChild(span);
+  field.appendChild(swatch);
+
+  return field;
+}
+
+function formatTimestamp(timestamp) {
+  if (!timestamp) return "Unknown";
+  const date = new Date(timestamp);
+  return date.toLocaleString();
+}

@@ -127,7 +127,6 @@
 
 
 <div id="lookup" class="floating-panel"></div>
-<div id="history" class="floating-panel"></div>
 <div id="loading"><span>{{{i18n 'Loading...'}}}</span></div>
 <div id="reticule"></div>
 <div id="cursor">
@@ -879,6 +878,20 @@
         </h2>
         <div class="right">
             <button type="button" class="panel-closer" title="{{{i18n 'Close Panel'}}}"><i class="fas fa-times"></i></button>
+        </div>
+    </header>
+    <div class="panel-body"></div>
+</aside>
+
+<aside id="history" data-panel="hisotry" class="panel right">
+    <header class="panel-header">
+        <div class="left"></div>
+        <h2>
+            <i class="fas fa-history"></i>
+            <span class="panel-title">History</span>
+        </h2>
+        <div class="right">
+            <button type="button" class="panel-closer" title="{{{i18n 'Close Pane'}}}"><i class="fas fa-times"></i></button>
         </div>
     </header>
     <div class="panel-body"></div>
