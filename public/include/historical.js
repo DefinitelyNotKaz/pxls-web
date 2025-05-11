@@ -5,9 +5,9 @@ module.exports.historical = runLookup;
 function runLookup(board, clientX, clientY) {
   const pos = board.fromScreen(clientX, clientY);
   $.get("/historical", pos, function (data) {
-    console.log(data);
+    console.log(data, place);
 
-    const historyBody = $("#history>.body");
+    const historyBody = $("#history>.panel-body");
     historyBody.empty();
 
     const history = data.placements.reverse();
@@ -21,8 +21,6 @@ function runLookup(board, clientX, clientY) {
     });
 
     $("#history").addClass("open");
-
-    console.log(place.palette);
   });
 }
 
