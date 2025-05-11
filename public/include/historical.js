@@ -44,7 +44,9 @@ function createStatsArticle(placements, lastUpdate) {
   pad.classList.add("pad-wrapper");
 
   pad.appendChild(createHistoryField("Placements: ", placements));
-  pad.appendChild(createHistoryField("Last Updated: ", lastUpdate));
+  pad.appendChild(
+    createHistoryField("Last Updated: ", formatRelativeTimestamp(lastUpdate)),
+  );
 
   article.appendChild(pad);
   return article;
@@ -58,7 +60,7 @@ function createPlacementArticle(placement) {
   pad.appendChild(createHistoryField("Username: ", placement.username));
   pad.appendChild(createHistoryField("Faction: ", placement.faction));
   pad.appendChild(
-    createHistoryField("Time: ", formatTimestamp(placement.time)),
+    createHistoryField("Time: ", formatRelativeTimestamp(placement.time)),
   );
   pad.appendChild(createColorField("Color: ", placement.color));
 
@@ -87,8 +89,26 @@ function createColorField(label, color) {
   return field;
 }
 
-function formatTimestamp(timestamp) {
-  if (!timestamp) return "Unknown";
-  const date = new Date(timestamp);
-  return date.toLocaleString();
+function formatRelativeTimestamp(time) {
+  const now = Date.now();
+  const deltaSeconds = (now - time) / 1000;
+  const timestamp = new Date(time).toLocaleString();
+
+  if (deltaSeconds > 86400) {
+    return timestamp;
+  }
+
+  if (deltaSeconds < 5) {
+    return "just now";
+  }
+
+  const hours = Math.floor(deltaSeconds / 3600);
+  const minutes = Math.floor((deltaSeconds % 3600) / 60);
+  const seconds = Math.floor(deltaSeconds % 60);
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)} ago`;
+}
+
+function pad(num) {
+  return num < 10 ? "0" + num : num;
 }
