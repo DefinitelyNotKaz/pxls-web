@@ -1,4 +1,4 @@
-import { place } from "./place";
+const { place } = require("./place");
 
 module.exports.historical = runLookup;
 
@@ -20,7 +20,7 @@ function runLookup(board, clientX, clientY) {
       historyBody.append(createPlacementArticle(p));
     });
 
-    $("#history").classList.add("open");
+    $("#history").addClass("open");
 
     console.log(place.palette);
   });
