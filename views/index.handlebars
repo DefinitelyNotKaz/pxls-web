@@ -38,6 +38,9 @@
             <i class="fas fa-bell" id="notifications-icon"></i>
             <i class="fas fa-circle ping-counter" id="notifications-ping-counter"></i>
         </button>
+        <button type="button" class="panel-trigger" id="play-timelapse" title="Watch timelapse">
+            <i class="fas fa-play"></i>
+        </button>
     </div>
     <div class="mid"></div>
     <div class="right">
@@ -166,6 +169,23 @@
 <div class="g-recaptcha"
      data-callback="recaptchaCallback"
      data-size="invisible"></div>
+
+<!-- Timelapse Modal -->
+<div id="timelapse-modal" class="modal" style="max-width: 960px;" data-meta-url="/timelapse.json">
+    <h3 style="margin-top:0;">{{{i18n 'Timelapse'}}}</h3>
+    <video id="timelapse-video" controls playsinline preload="metadata" style="width: 100%; max-height: 70vh; background: #000;">
+        <source src="/timelapse.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+    </video>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem;" >
+        <div id="timelapse-meta"
+            style="margin-top:.5rem; font-size:.9rem; opacity:.9; display:flex; align-items:center; gap:.75rem;">
+            <span id="timelapse-rendered" style="white-space:nowrap;"></span>
+            <span id="timelapse-meta-error" style="color:#f55; display:none;">Metadata unavailable</span>
+        </div>
+        <a href="/timelapse.mp4" download class="text-button" style="float:right;">{{{i18n 'Download video'}}}</a>
+    </div>
+</div>
 
 <aside class="panel left" data-panel="info">
     <header class="panel-header">
@@ -884,6 +904,68 @@
 </aside>
 
 <script src="pxls{{scriptLang}}.js"></script>
+<script>
+    // Timelapse modal: open on play, autoplay on open, pause on close
+    $(function() {
+        function getVideo() { return document.getElementById('timelapse-video'); }
+        function setMeta(text, isError) {
+            var el = document.getElementById('timelapse-rendered');
+            var err = document.getElementById('timelapse-meta-error');
+            if (!el || !err) return;
+            if (isError) {
+                err.style.display = '';
+                el.textContent = '';
+            } else {
+                err.style.display = 'none';
+                el.textContent = text || '';
+            }
+        }
+        async function fetchMeta() {
+            try {
+                var modal = document.getElementById('timelapse-modal');
+                var url = (modal && modal.getAttribute('data-meta-url')) || '/timelapse.json';
+                setMeta('Loading…');
+                const res = await fetch(url, { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                // Expected shape: { renderedAt: ISO8601 or epoch millis, sizeBytes?, durationSec? }
+                var ts = data.renderedAt;
+                var m = ts ? moment(ts) : null;
+                var formatted = m && m.isValid() ? m.format('YYYY-MM-DD HH:mm z') + ' (' + m.fromNow() + ')' : null;
+                var extras = [];
+                if (typeof data.durationSec === 'number') {
+                    var mins = Math.floor(data.durationSec / 60);
+                    var secs = Math.floor(data.durationSec % 60).toString().padStart(2,'0');
+                    extras.push(mins + ':' + secs);
+                }
+                if (typeof data.sizeBytes === 'number') {
+                    var mb = (data.sizeBytes / (1024*1024)).toFixed(1);
+                    extras.push(mb + ' MB');
+                }
+                var suffix = extras.length ? ' · ' + extras.join(' · ') : '';
+                if (formatted) setMeta('Rendered: ' + formatted + suffix);
+                else setMeta(null, true);
+            } catch (e) {
+                setMeta(null, true);
+            }
+        }
+        $('#play-timelapse').on('click', function(e) {
+            e.preventDefault();
+            $('#timelapse-modal').modal({ fadeDuration: 150, showClose: true });
+        });
+        $(document).on('modal:open', '#timelapse-modal', function() {
+            var v = getVideo();
+            if (!v) return;
+            try { v.currentTime = 0; v.play().catch(function(){}); } catch (e) {}
+            fetchMeta();
+        });
+        $(document).on('modal:before-close', '#timelapse-modal', function() {
+            var v = getVideo();
+            if (!v) return;
+            try { v.pause(); } catch (e) {}
+        });
+    });
+    </script>
 
 </body>
 </html>

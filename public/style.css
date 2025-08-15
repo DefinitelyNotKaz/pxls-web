@@ -2236,7 +2236,9 @@ body .emoji-picker {
     max-height: 99vh;
     padding: 0;
     outline: 0;
-    overflow: hidden;
+    overflow: visible;
+    background: var(--bubble-background);
+    color: var(--bubble-text-color);
 }
 
 .modal .modal-header, .modal .modal-footer {
