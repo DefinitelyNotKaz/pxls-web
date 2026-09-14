@@ -10,7 +10,7 @@ let user;
 let place;
 let board;
 
-const { intToHex } = require('./helpers');
+const { intToHex, sanitizeLinkURL } = require('./helpers');
 
 const chat = (function() {
   const self = {
@@ -1591,7 +1591,12 @@ const chat = (function() {
       elem.classList.add('shadow-banned');
       elem.dataset.shadowBanned = 'true';
     },
-    _makeLinkElement: (href) => {
+    _makeLinkElement: (rawHref) => {
+      const href = sanitizeLinkURL(rawHref);
+      if (href === null) {
+        return crel('span', rawHref);
+      }
+
       function handleClick(e) {
         if (e.shiftKey || e.ctrlKey || e.metaKey) {
           // open the link in a new window / tab
@@ -1618,7 +1623,7 @@ const chat = (function() {
         class: 'link',
         href,
         onclick: handleClick
-      }, href);
+      }, rawHref);
     },
     _popLinkCheck: (href) => {
       return new Promise((resolve, reject) => {
