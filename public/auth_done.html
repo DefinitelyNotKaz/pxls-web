@@ -13,7 +13,14 @@
         const queryParams = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
 
         if (queryParams['nologin'] != null) {
-            if (localStorage.getItem('auth_same_window') != null) {
+            if (queryParams['reason'] === 'whitelist') {
+                // Not authorized for this canvas — explain instead of closing silently
+                localStorage.removeItem('auth_same_window');
+                document.body.innerHTML = '<p><strong>Sign in failed</strong></p>'
+                    + '<p>Your Discord account is not authorized to access this canvas.</p>'
+                    + '<p>You can still watch as a spectator.</p>'
+                    + '<p><a href="/">Back to the canvas</a></p>';
+            } else if (localStorage.getItem('auth_same_window') != null) {
                 localStorage.removeItem('auth_same_window');
                 window.location = '/';
             } else {
